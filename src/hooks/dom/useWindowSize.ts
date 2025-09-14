@@ -47,7 +47,7 @@ function debounce<T extends (...args: any[]) => any>(
   delay: number
 ): (...args: Parameters<T>) => void {
   let timeoutId: NodeJS.Timeout;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func(...args), delay);
@@ -60,10 +60,7 @@ function debounce<T extends (...args: any[]) => any>(
  * @returns 当前窗口尺寸
  */
 function useWindowSize(options: UseWindowSizeOptions = {}): WindowSize {
-  const {
-    debounceMs = 100,
-    initialSize = { width: 0, height: 0 },
-  } = options;
+  const { debounceMs = 100, initialSize = { width: 0, height: 0 } } = options;
 
   // 初始化状态
   const [windowSize, setWindowSize] = useState<WindowSize>(() => {
@@ -86,7 +83,10 @@ function useWindowSize(options: UseWindowSizeOptions = {}): WindowSize {
       const newSize = getWindowSize();
       setWindowSize(prevSize => {
         // 只有当尺寸真正改变时才更新状态
-        if (prevSize.width !== newSize.width || prevSize.height !== newSize.height) {
+        if (
+          prevSize.width !== newSize.width ||
+          prevSize.height !== newSize.height
+        ) {
           return newSize;
         }
         return prevSize;
@@ -101,7 +101,7 @@ function useWindowSize(options: UseWindowSizeOptions = {}): WindowSize {
 
     // 添加事件监听器
     window.addEventListener('resize', debouncedUpdateSize);
-    
+
     // 也监听orientationchange事件（移动设备旋转）
     window.addEventListener('orientationchange', debouncedUpdateSize);
 

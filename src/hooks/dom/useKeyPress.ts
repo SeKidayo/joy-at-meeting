@@ -17,7 +17,7 @@ interface UseKeyPressOptions {
 /**
  * useKeyPress Hook
  * 监听键盘按键事件
- * 
+ *
  * @param targetKey - 要监听的按键或按键数组
  * @param options - 配置选项
  * @returns 按键是否被按下
@@ -98,7 +98,7 @@ function useKeyPress(
 /**
  * useKeyCombo Hook
  * 监听组合键事件（如 Ctrl+S, Cmd+C 等）
- * 
+ *
  * @param keys - 组合键配置
  * @param callback - 按下组合键时的回调函数
  * @param options - 配置选项

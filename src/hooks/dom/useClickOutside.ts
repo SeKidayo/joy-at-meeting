@@ -3,7 +3,7 @@ import { useEffect, RefObject } from 'react';
 /**
  * useClickOutside Hook
  * 检测元素外部的点击事件
- * 
+ *
  * @param ref - 要监听的元素引用
  * @param handler - 点击外部时的回调函数
  * @param mouseEvent - 要监听的鼠标事件类型，默认为 'mousedown'
@@ -22,12 +22,12 @@ function useClickOutside<T extends HTMLElement = HTMLElement>(
      */
     const handleClickOutside = (event: Event) => {
       const el = ref?.current;
-      
+
       // 如果元素不存在或者点击的是元素内部，则不触发回调
       if (!el || el.contains(event.target as Node)) {
         return;
       }
-      
+
       handler(event);
     };
 

@@ -23,7 +23,7 @@ function useThrottle<T>(
   options: UseThrottleOptions = {}
 ): T {
   const { leading = true, trailing = true } = options;
-  
+
   const [throttledValue, setThrottledValue] = useState<T>(value);
   const lastExecutedRef = useRef<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -42,7 +42,7 @@ function useThrottle<T>(
 
   useEffect(() => {
     lastValueRef.current = value;
-    
+
     const now = Date.now();
     const timeSinceLastExecution = now - lastExecutedRef.current;
 
@@ -75,7 +75,7 @@ function useThrottle<T>(
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      
+
       const remainingTime = delay - timeSinceLastExecution;
       timeoutRef.current = setTimeout(updateValue, remainingTime);
     }
@@ -105,7 +105,7 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
   options: UseThrottleOptions = {}
 ): T {
   const { leading = true, trailing = true } = options;
-  
+
   const lastExecutedRef = useRef<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const argsRef = useRef<Parameters<T>>();
@@ -122,44 +122,42 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
     };
   }, []);
 
-  const throttledCallback = useRef<T>(
-    ((...args: Parameters<T>) => {
-      argsRef.current = args;
-      const now = Date.now();
-      const timeSinceLastExecution = now - lastExecutedRef.current;
+  const throttledCallback = useRef<T>(((...args: Parameters<T>) => {
+    argsRef.current = args;
+    const now = Date.now();
+    const timeSinceLastExecution = now - lastExecutedRef.current;
 
-      const executeCallback = () => {
-        lastExecutedRef.current = Date.now();
-        return callbackRef.current(...(argsRef.current as Parameters<T>));
-      };
+    const executeCallback = () => {
+      lastExecutedRef.current = Date.now();
+      return callbackRef.current(...(argsRef.current as Parameters<T>));
+    };
 
-      // 如果是第一次执行且允许leading
-      if (lastExecutedRef.current === 0 && leading) {
+    // 如果是第一次执行且允许leading
+    if (lastExecutedRef.current === 0 && leading) {
+      return executeCallback();
+    }
+
+    // 如果距离上次执行的时间大于等于延迟时间
+    if (timeSinceLastExecution >= delay) {
+      if (leading) {
         return executeCallback();
-      }
-
-      // 如果距离上次执行的时间大于等于延迟时间
-      if (timeSinceLastExecution >= delay) {
-        if (leading) {
-          return executeCallback();
-        } else if (trailing) {
-          // 如果不允许leading但允许trailing，设置延迟执行
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-          }
-          timeoutRef.current = setTimeout(executeCallback, delay);
-        }
       } else if (trailing) {
-        // 如果还没到执行时间但允许trailing，设置剩余时间后执行
+        // 如果不允许leading但允许trailing，设置延迟执行
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
-        
-        const remainingTime = delay - timeSinceLastExecution;
-        timeoutRef.current = setTimeout(executeCallback, remainingTime);
+        timeoutRef.current = setTimeout(executeCallback, delay);
       }
-    }) as T
-  ).current;
+    } else if (trailing) {
+      // 如果还没到执行时间但允许trailing，设置剩余时间后执行
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      const remainingTime = delay - timeSinceLastExecution;
+      timeoutRef.current = setTimeout(executeCallback, remainingTime);
+    }
+  }) as T).current;
 
   return throttledCallback;
 }

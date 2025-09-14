@@ -37,7 +37,8 @@ function useLocalStorage<T>(
   const setStoredValue = useCallback(
     (newValue: T | ((prevValue: T) => T)) => {
       try {
-        const valueToStore = newValue instanceof Function ? newValue(value) : newValue;
+        const valueToStore =
+          newValue instanceof Function ? newValue(value) : newValue;
         setValue(valueToStore);
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       } catch (error) {
@@ -64,7 +65,10 @@ function useLocalStorage<T>(
         try {
           setValue(JSON.parse(e.newValue));
         } catch (error) {
-          console.warn(`Error parsing localStorage value for key "${key}":`, error);
+          console.warn(
+            `Error parsing localStorage value for key "${key}":`,
+            error
+          );
         }
       }
     };

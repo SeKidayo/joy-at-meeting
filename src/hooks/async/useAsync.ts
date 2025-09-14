@@ -50,23 +50,23 @@ function useAsync<T>(
 
       try {
         const result = await asyncFunction(...args);
-        
+
         // 检查组件是否仍然挂载
         if (mountedRef.current) {
           setData(result);
           setStatus('success');
         }
-        
+
         return result;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        
+
         // 检查组件是否仍然挂载
         if (mountedRef.current) {
           setError(error);
           setStatus('error');
         }
-        
+
         throw error;
       }
     },

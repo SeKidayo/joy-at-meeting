@@ -33,10 +33,7 @@ export const validationRules = {
    * @param minLength - 最小长度
    * @param message - 错误信息
    */
-  minLength: (
-    minLength: number,
-    message?: string
-  ): ValidationRule<string> => {
+  minLength: (minLength: number, message?: string): ValidationRule<string> => {
     return (value: string) => {
       if (value && value.length < minLength) {
         return message || `Minimum length is ${minLength} characters`;
@@ -50,10 +47,7 @@ export const validationRules = {
    * @param maxLength - 最大长度
    * @param message - 错误信息
    */
-  maxLength: (
-    maxLength: number,
-    message?: string
-  ): ValidationRule<string> => {
+  maxLength: (maxLength: number, message?: string): ValidationRule<string> => {
     return (value: string) => {
       if (value && value.length > maxLength) {
         return message || `Maximum length is ${maxLength} characters`;
@@ -94,7 +88,9 @@ export const validationRules = {
    * 邮箱格式验证
    * @param message - 错误信息
    */
-  email: (message = 'Please enter a valid email address'): ValidationRule<string> => {
+  email: (
+    message = 'Please enter a valid email address'
+  ): ValidationRule<string> => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return (value: string) => {
       if (value && !emailRegex.test(value)) {
@@ -108,7 +104,9 @@ export const validationRules = {
    * 手机号格式验证（中国大陆）
    * @param message - 错误信息
    */
-  phone: (message = 'Please enter a valid phone number'): ValidationRule<string> => {
+  phone: (
+    message = 'Please enter a valid phone number'
+  ): ValidationRule<string> => {
     const phoneRegex = /^1[3-9]\d{9}$/;
     return (value: string) => {
       if (value && !phoneRegex.test(value)) {
@@ -169,7 +167,9 @@ export const validationRules = {
    * 整数验证
    * @param message - 错误信息
    */
-  integer: (message = 'Please enter a valid integer'): ValidationRule<string> => {
+  integer: (
+    message = 'Please enter a valid integer'
+  ): ValidationRule<string> => {
     return (value: string) => {
       if (value && (!Number.isInteger(Number(value)) || value.includes('.'))) {
         return message;
@@ -269,9 +269,14 @@ export interface UseValidationReturn {
   /** 验证单个值 */
   validate: (value: any, fieldName?: string) => Promise<string | undefined>;
   /** 验证多个值 */
-  validateAll: (values: Record<string, any>) => Promise<Record<string, string | undefined>>;
+  validateAll: (
+    values: Record<string, any>
+  ) => Promise<Record<string, string | undefined>>;
   /** 创建验证器 */
-  createValidator: (rules: ValidationRule[], stopOnFirstError?: boolean) => ValidationRule;
+  createValidator: (
+    rules: ValidationRule[],
+    stopOnFirstError?: boolean
+  ) => ValidationRule;
 }
 
 /**
@@ -293,7 +298,8 @@ function useValidation(config?: ValidatorConfig): UseValidationReturn {
               return error;
             }
           } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Validation error';
+            const errorMessage =
+              err instanceof Error ? err.message : 'Validation error';
             if (stopOnFirst) {
               return errorMessage;
             }
@@ -320,15 +326,19 @@ function useValidation(config?: ValidatorConfig): UseValidationReturn {
 
   // 验证多个值
   const validateAll = useCallback(
-    async (values: Record<string, any>): Promise<Record<string, string | undefined>> => {
+    async (
+      values: Record<string, any>
+    ): Promise<Record<string, string | undefined>> => {
       const errors: Record<string, string | undefined> = {};
-      
-      const validationPromises = Object.entries(values).map(async ([fieldName, value]) => {
-        const error = await validate(value, fieldName);
-        if (error) {
-          errors[fieldName] = error;
+
+      const validationPromises = Object.entries(values).map(
+        async ([fieldName, value]) => {
+          const error = await validate(value, fieldName);
+          if (error) {
+            errors[fieldName] = error;
+          }
         }
-      });
+      );
 
       await Promise.all(validationPromises);
       return errors;

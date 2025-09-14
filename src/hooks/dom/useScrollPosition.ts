@@ -20,18 +20,20 @@ interface UseScrollPositionOptions {
 /**
  * useScrollPosition Hook
  * 监听页面或特定元素的滚动位置
- * 
+ *
  * @param options - 配置选项
  * @returns 当前滚动位置 { x, y }
  */
-function useScrollPosition(options: UseScrollPositionOptions = {}): ScrollPosition {
+function useScrollPosition(
+  options: UseScrollPositionOptions = {}
+): ScrollPosition {
   const { element, useWindow = true, wait = 100 } = options;
-  
+
   const [position, setPosition] = useState<ScrollPosition>({ x: 0, y: 0 });
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
-    
+
     /**
      * 获取滚动位置
      * @returns 滚动位置对象
@@ -43,14 +45,14 @@ function useScrollPosition(options: UseScrollPositionOptions = {}): ScrollPositi
           y: window.pageYOffset || document.documentElement.scrollTop,
         };
       }
-      
+
       if (element?.current) {
         return {
           x: element.current.scrollLeft,
           y: element.current.scrollTop,
         };
       }
-      
+
       return { x: 0, y: 0 };
     };
 
@@ -61,7 +63,7 @@ function useScrollPosition(options: UseScrollPositionOptions = {}): ScrollPositi
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      
+
       timeoutId = setTimeout(() => {
         setPosition(getScrollPosition());
       }, wait);
@@ -81,7 +83,7 @@ function useScrollPosition(options: UseScrollPositionOptions = {}): ScrollPositi
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      
+
       if (target) {
         target.removeEventListener('scroll', handleScroll);
       }

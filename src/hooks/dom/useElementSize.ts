@@ -11,7 +11,7 @@ interface ElementSize {
 /**
  * useElementSize Hook
  * 监听元素尺寸变化，使用 ResizeObserver API
- * 
+ *
  * @param ref - 要监听的元素引用
  * @returns 元素的当前尺寸 { width, height }
  */
@@ -22,7 +22,7 @@ function useElementSize<T extends HTMLElement = HTMLElement>(
 
   useEffect(() => {
     const element = ref.current;
-    
+
     if (!element) {
       return;
     }
@@ -45,7 +45,7 @@ function useElementSize<T extends HTMLElement = HTMLElement>(
 
     // 检查是否支持 ResizeObserver
     if (typeof ResizeObserver !== 'undefined') {
-      const resizeObserver = new ResizeObserver((entries) => {
+      const resizeObserver = new ResizeObserver(entries => {
         for (const entry of entries) {
           const { width, height } = entry.contentRect;
           setSize({ width, height });
@@ -66,7 +66,7 @@ function useElementSize<T extends HTMLElement = HTMLElement>(
       };
 
       window.addEventListener('resize', handleResize);
-      
+
       // 清理函数
       return () => {
         window.removeEventListener('resize', handleResize);

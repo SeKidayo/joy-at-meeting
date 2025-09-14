@@ -180,7 +180,7 @@ function useForm(config: FormConfig = {}): UseFormReturn {
     const newErrors: FormErrors = {};
 
     // 验证所有字段
-    const fieldValidationPromises = Object.keys(fields).map(async (name) => {
+    const fieldValidationPromises = Object.keys(fields).map(async name => {
       const error = await validateField(name);
       if (error) {
         newErrors[name] = error;
@@ -205,31 +205,34 @@ function useForm(config: FormConfig = {}): UseFormReturn {
   // 设置字段值
   const setFieldValue = useCallback(
     async (name: string, value: any) => {
-      setValues((prev) => ({ ...prev, [name]: value }));
+      setValues(prev => ({ ...prev, [name]: value }));
 
       // 如果启用了onChange验证
       if (validateOnChange) {
         const error = await validateField(name);
-        setErrors((prev) => ({ ...prev, [name]: error }));
+        setErrors(prev => ({ ...prev, [name]: error }));
       }
     },
     [validateOnChange, validateField]
   );
 
   // 设置字段错误
-  const setFieldError = useCallback((name: string, error: string | undefined) => {
-    setErrors((prev) => ({ ...prev, [name]: error }));
-  }, []);
+  const setFieldError = useCallback(
+    (name: string, error: string | undefined) => {
+      setErrors(prev => ({ ...prev, [name]: error }));
+    },
+    []
+  );
 
   // 设置字段触碰状态
   const setFieldTouched = useCallback(
     async (name: string, isTouched = true) => {
-      setTouched((prev) => ({ ...prev, [name]: isTouched }));
+      setTouched(prev => ({ ...prev, [name]: isTouched }));
 
       // 如果启用了onBlur验证且字段被触碰
       if (validateOnBlur && isTouched) {
         const error = await validateField(name);
-        setErrors((prev) => ({ ...prev, [name]: error }));
+        setErrors(prev => ({ ...prev, [name]: error }));
       }
     },
     [validateOnBlur, validateField]
@@ -311,21 +314,21 @@ function useForm(config: FormConfig = {}): UseFormReturn {
   const resetField = useCallback(
     (name: string) => {
       const initialValue = fields[name]?.initialValue ?? '';
-      setValues((prev) => ({ ...prev, [name]: initialValue }));
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-      setTouched((prev) => ({ ...prev, [name]: false }));
+      setValues(prev => ({ ...prev, [name]: initialValue }));
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+      setTouched(prev => ({ ...prev, [name]: false }));
     },
     [fields]
   );
 
   // 批量设置值
   const setValuesCallback = useCallback((newValues: Partial<FormValues>) => {
-    setValues((prev) => ({ ...prev, ...newValues }));
+    setValues(prev => ({ ...prev, ...newValues }));
   }, []);
 
   // 批量设置错误
   const setErrorsCallback = useCallback((newErrors: Partial<FormErrors>) => {
-    setErrors((prev) => ({ ...prev, ...newErrors }));
+    setErrors(prev => ({ ...prev, ...newErrors }));
   }, []);
 
   const formState: FormState = {

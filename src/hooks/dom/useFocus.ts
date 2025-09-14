@@ -18,7 +18,7 @@ interface FocusState {
 /**
  * useFocus Hook
  * 监听元素的焦点状态
- * 
+ *
  * @param ref - 要监听的元素引用
  * @param options - 配置选项
  * @returns 焦点状态对象
@@ -35,7 +35,7 @@ function useFocus<T extends HTMLElement = HTMLElement>(
 
   useEffect(() => {
     const element = ref.current;
-    
+
     if (!element) {
       return;
     }
@@ -79,10 +79,10 @@ function useFocus<T extends HTMLElement = HTMLElement>(
      */
     const handleGlobalFocusChange = () => {
       if (!detectFocusWithin) return;
-      
+
       const isFocusWithin = checkFocusWithin(element);
       const isFocused = document.activeElement === element;
-      
+
       setFocusState({
         isFocused,
         isFocusWithin,
@@ -111,7 +111,7 @@ function useFocus<T extends HTMLElement = HTMLElement>(
     return () => {
       element.removeEventListener('focus', handleFocus);
       element.removeEventListener('blur', handleBlur);
-      
+
       if (detectFocusWithin) {
         document.removeEventListener('focusin', handleGlobalFocusChange);
         document.removeEventListener('focusout', handleGlobalFocusChange);

@@ -37,7 +37,9 @@ export interface UseFetchReturn<T> extends Omit<UseAsyncReturn<T>, 'execute'> {
  * @param params - 查询参数对象
  * @returns 查询字符串
  */
-function buildQueryString(params: Record<string, string | number | boolean>): string {
+function buildQueryString(
+  params: Record<string, string | number | boolean>
+): string {
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     searchParams.append(key, String(value));
@@ -130,7 +132,9 @@ function useFetch<T = any>(
 
       // 检查响应状态
       if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `HTTP Error: ${response.status} ${response.statusText}`
+        );
       }
 
       // 解析响应
@@ -138,7 +142,7 @@ function useFetch<T = any>(
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
       }
-      
+
       return (await response.text()) as unknown as T;
     };
   }, [initialUrl, initialOptions]);

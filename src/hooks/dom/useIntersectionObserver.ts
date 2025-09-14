@@ -54,60 +54,63 @@ function useIntersectionObserver(
   const hasTriggeredRef = useRef(false);
 
   // 设置元素引用的回调函数
-  const setRef = useCallback((node: Element | null) => {
-    // 清理之前的观察器
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-      observerRef.current = null;
-    }
-
-    elementRef.current = node;
-
-    // 如果跳过或没有元素，直接返回
-    if (skip || !node) {
-      return;
-    }
-
-    // 如果只触发一次且已经触发过，直接返回
-    if (triggerOnce && hasTriggeredRef.current) {
-      return;
-    }
-
-    // 检查浏览器是否支持 IntersectionObserver
-    if (!window.IntersectionObserver) {
-      console.warn('IntersectionObserver is not supported in this browser');
-      return;
-    }
-
-    // 创建新的观察器
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const [observerEntry] = entries;
-        
-        setEntry(observerEntry);
-        setIsIntersecting(observerEntry.isIntersecting);
-        setIntersectionRatio(observerEntry.intersectionRatio);
-
-        // 如果只触发一次且当前正在交叉，标记为已触发
-        if (triggerOnce && observerEntry.isIntersecting) {
-          hasTriggeredRef.current = true;
-          // 停止观察
-          if (observerRef.current) {
-            observerRef.current.disconnect();
-            observerRef.current = null;
-          }
-        }
-      },
-      {
-        root,
-        rootMargin,
-        threshold,
+  const setRef = useCallback(
+    (node: Element | null) => {
+      // 清理之前的观察器
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
       }
-    );
 
-    // 开始观察元素
-    observerRef.current.observe(node);
-  }, [root, rootMargin, threshold, triggerOnce, skip]);
+      elementRef.current = node;
+
+      // 如果跳过或没有元素，直接返回
+      if (skip || !node) {
+        return;
+      }
+
+      // 如果只触发一次且已经触发过，直接返回
+      if (triggerOnce && hasTriggeredRef.current) {
+        return;
+      }
+
+      // 检查浏览器是否支持 IntersectionObserver
+      if (!window.IntersectionObserver) {
+        console.warn('IntersectionObserver is not supported in this browser');
+        return;
+      }
+
+      // 创建新的观察器
+      observerRef.current = new IntersectionObserver(
+        entries => {
+          const [observerEntry] = entries;
+
+          setEntry(observerEntry);
+          setIsIntersecting(observerEntry.isIntersecting);
+          setIntersectionRatio(observerEntry.intersectionRatio);
+
+          // 如果只触发一次且当前正在交叉，标记为已触发
+          if (triggerOnce && observerEntry.isIntersecting) {
+            hasTriggeredRef.current = true;
+            // 停止观察
+            if (observerRef.current) {
+              observerRef.current.disconnect();
+              observerRef.current = null;
+            }
+          }
+        },
+        {
+          root,
+          rootMargin,
+          threshold,
+        }
+      );
+
+      // 开始观察元素
+      observerRef.current.observe(node);
+    },
+    [root, rootMargin, threshold, triggerOnce, skip]
+  );
 
   // 组件卸载时清理观察器
   useEffect(() => {
