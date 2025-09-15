@@ -20,7 +20,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/your-username/joy-at-meeting.git
+git clone https://github.com/joy-at-meeting/joy-at-meeting.git
 cd joy-at-meeting
 
 # 安装依赖
@@ -103,7 +103,7 @@ git clone https://github.com/your-username/joy-at-meeting.git
 cd joy-at-meeting
 
 # 添加上游仓库
-git remote add upstream https://github.com/original-owner/joy-at-meeting.git
+git remote add upstream https://github.com/joy-at-meeting/joy-at-meeting.git
 
 # 创建功能分支
 git checkout -b feature/your-feature-name
@@ -449,15 +449,15 @@ npm run test:coverage
 
 如果您需要帮助，可以：
 
-- 查看现有的 [Issues](https://github.com/your-username/joy-at-meeting/issues)
+- 查看现有的 [Issues](https://github.com/joy-at-meeting/joy-at-meeting/issues)
 - 创建新的 Issue
-- 参与 [Discussions](https://github.com/your-username/joy-at-meeting/discussions)
+- 参与 [Discussions](https://github.com/joy-at-meeting/joy-at-meeting/discussions)
 
 ### 联系方式
 
 - GitHub Issues: 报告 bug 和功能请求
 - GitHub Discussions: 一般讨论和问题
-- Email: maintainer@example.com
+- Email: contact@joy-at-meeting.dev
 
 ## 常见问题
 

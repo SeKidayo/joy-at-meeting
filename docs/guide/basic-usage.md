@@ -99,7 +99,7 @@ function CounterExample() {
 检测元素外部点击：
 
 ```tsx
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useClickOutside } from 'joy-at-meeting'
 
 function DropdownMenu() {
@@ -191,7 +191,7 @@ function ResizableBox() {
 防抖处理：
 
 ```tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDebounce } from 'joy-at-meeting'
 
 function SearchInput() {
@@ -225,7 +225,7 @@ function SearchInput() {
 节流处理：
 
 ```tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useThrottle } from 'joy-at-meeting'
 
 function MouseTracker() {
@@ -266,12 +266,12 @@ function UserList() {
     return response.json()
   }
 
-  const { data: users, loading, error, execute } = useAsync(fetchUsers)
+  const { data: users, isLoading, error, execute } = useAsync(fetchUsers)
 
   return (
     <div>
-      <button onClick={execute} disabled={loading}>
-        {loading ? '加载中...' : '获取用户'}
+      <button onClick={execute} disabled={isLoading}>
+        {isLoading ? '加载中...' : '获取用户'}
       </button>
       
       {error && <p style={{ color: 'red' }}>错误: {error.message}</p>}
@@ -294,15 +294,25 @@ HTTP 请求封装：
 
 ```tsx
 import { useFetch } from 'joy-at-meeting'
+import { useEffect } from 'react'
 
 function PostDetail({ postId }: { postId: string }) {
-  const { data: post, loading, error } = useFetch(`/api/posts/${postId}`, {
-    headers: {
-      'Authorization': 'Bearer token'
-    }
-  })
+  const { data: post, isLoading, error, execute } = useFetch<{
+    title: string
+    content: string
+  }>()
 
-  if (loading) return <div>加载中...</div>
+  useEffect(() => {
+    if (postId) {
+      execute(`/api/posts/${postId}`, {
+        headers: {
+          'Authorization': 'Bearer token'
+        }
+      })
+    }
+  }, [postId, execute])
+
+  if (isLoading) return <div>加载中...</div>
   if (error) return <div>错误: {error.message}</div>
   if (!post) return <div>未找到文章</div>
 
@@ -395,6 +405,7 @@ import {
   useDebounce, 
   useAsync 
 } from 'joy-at-meeting'
+import { useState, useEffect } from 'react'
 
 function SmartSearchApp() {
   const [searchHistory, setSearchHistory] = useLocalStorage('searchHistory', [])
@@ -407,10 +418,14 @@ function SmartSearchApp() {
     return response.json()
   }
   
-  const { data: results, loading } = useAsync(
-    () => searchAPI(debouncedQuery),
-    [debouncedQuery]
-  )
+  const { data: results, isLoading, execute } = useAsync(searchAPI)
+  
+  // 当搜索词变化时执行搜索
+  useEffect(() => {
+    if (debouncedQuery) {
+      execute(debouncedQuery)
+    }
+  }, [debouncedQuery, execute])
   
   const handleSearch = (searchTerm: string) => {
     setQuery(searchTerm)
@@ -442,7 +457,7 @@ function SmartSearchApp() {
         </div>
       )}
       
-      {loading && <div>搜索中...</div>}
+      {isLoading && <div>搜索中...</div>}
       
       {results && (
         <div className="search-results">

@@ -30,6 +30,13 @@ export default defineConfig({
             { text: '基本用法', link: '/guide/basic-usage' },
             { text: '代码预览', link: '/guide/code-preview' }
           ]
+        },
+        {
+          text: '项目信息',
+          items: [
+            { text: '更新日志', link: '/guide/changelog' },
+            { text: '贡献指南', link: '/guide/contributing' }
+          ]
         }
       ],
       '/api/': [

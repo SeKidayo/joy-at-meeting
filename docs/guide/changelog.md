@@ -129,8 +129,8 @@
 
 - API 可能在未来版本中发生变化
 - 可能存在未知的 bug
-- 文档可能不完整
-- 不建议在生产环境中使用
+- 文档正在完善中
+- 建议在非关键业务场景中谨慎使用
 
 实验性功能会在文档中明确标注。
 
@@ -138,9 +138,9 @@
 
 我们欢迎您的反馈和建议：
 
-- 🐛 [报告 Bug](https://github.com/your-username/joy-at-meeting/issues/new?template=bug_report.md)
-- 💡 [功能建议](https://github.com/your-username/joy-at-meeting/issues/new?template=feature_request.md)
-- 💬 [一般讨论](https://github.com/your-username/joy-at-meeting/discussions)
+- 🐛 [报告 Bug](https://github.com/joy-at-meeting/joy-at-meeting/issues/new?template=bug_report.md)
+- 💡 [功能建议](https://github.com/joy-at-meeting/joy-at-meeting/issues/new?template=feature_request.md)
+- 💬 [一般讨论](https://github.com/joy-at-meeting/joy-at-meeting/discussions)
 
 ### 致谢
 

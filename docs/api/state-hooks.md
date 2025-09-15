@@ -4,12 +4,12 @@
 
 ## useLocalStorage
 
-将状态持久化到浏览器的 localStorage 中。
+将状态持久化到浏览器的 localStorage 中，支持跨标签页同步。
 
 ### 语法
 
 ```tsx
-const [value, setValue] = useLocalStorage<T>(key: string, initialValue: T)
+const { value, setValue, removeValue } = useLocalStorage<T>(key: string, initialValue: T)
 ```
 
 ### 参数
@@ -19,9 +19,10 @@ const [value, setValue] = useLocalStorage<T>(key: string, initialValue: T)
 
 ### 返回值
 
-返回一个数组，包含：
-- `value` (T): 当前值
-- `setValue` (function): 设置值的函数
+返回一个对象，包含：
+- `value` (T): 当前存储的值
+- `setValue` (function): 设置新值的函数，支持函数式更新
+- `removeValue` (function): 移除存储值的函数
 
 ### 示例
 
@@ -29,8 +30,8 @@ const [value, setValue] = useLocalStorage<T>(key: string, initialValue: T)
 import { useLocalStorage } from 'joy-at-meeting'
 
 function UserSettings() {
-  const [theme, setTheme] = useLocalStorage('theme', 'light')
-  const [user, setUser] = useLocalStorage('user', {
+  const { value: theme, setValue: setTheme, removeValue: removeTheme } = useLocalStorage('theme', 'light')
+  const { value: user, setValue: setUser } = useLocalStorage('user', {
     name: '',
     email: ''
   })
@@ -47,6 +48,10 @@ function UserSettings() {
         onChange={(e) => setUser({ ...user, name: e.target.value })}
         placeholder="用户名"
       />
+      
+      <button onClick={removeTheme}>
+        重置主题
+      </button>
     </div>
   )
 }
@@ -63,12 +68,12 @@ function UserSettings() {
 
 ## useToggle
 
-简化布尔值状态的切换操作。
+简化布尔值状态的切换操作，提供多种便捷的操作方法。
 
 ### 语法
 
 ```tsx
-const [value, toggle, setValue] = useToggle(initialValue?: boolean)
+const { value, toggle, setTrue, setFalse, setValue } = useToggle(initialValue?: boolean)
 ```
 
 ### 参数
@@ -77,10 +82,12 @@ const [value, toggle, setValue] = useToggle(initialValue?: boolean)
 
 ### 返回值
 
-返回一个数组，包含：
+返回一个对象，包含：
 - `value` (boolean): 当前布尔值
-- `toggle` (function): 切换函数
-- `setValue` (function): 直接设置值的函数
+- `toggle` (function): 切换值的函数
+- `setTrue` (function): 设置为true的函数
+- `setFalse` (function): 设置为false的函数
+- `setValue` (function): 设置特定值的函数
 
 ### 示例
 
@@ -88,16 +95,16 @@ const [value, toggle, setValue] = useToggle(initialValue?: boolean)
 import { useToggle } from 'joy-at-meeting'
 
 function Modal() {
-  const [isOpen, toggle, setIsOpen] = useToggle(false)
-  const [isLoading, toggleLoading] = useToggle()
+  const { value: isOpen, toggle, setFalse: closeModal } = useToggle(false)
+  const { value: isLoading, toggle: toggleLoading, setTrue: startLoading, setFalse: stopLoading } = useToggle()
 
   const handleSubmit = async () => {
-    toggleLoading() // 开始加载
+    startLoading() // 开始加载
     try {
       await submitForm()
-      setIsOpen(false) // 关闭模态框
+      closeModal() // 关闭模态框
     } finally {
-      toggleLoading() // 结束加载
+      stopLoading() // 结束加载
     }
   }
 
@@ -110,7 +117,7 @@ function Modal() {
           <button onClick={handleSubmit} disabled={isLoading}>
             {isLoading ? '提交中...' : '提交'}
           </button>
-          <button onClick={() => setIsOpen(false)}>取消</button>
+          <button onClick={closeModal}>取消</button>
         </div>
       )}
     </div>
@@ -120,9 +127,10 @@ function Modal() {
 
 ### 特性
 
-- ✅ 简洁的 API
-- ✅ 支持直接设置值
+- ✅ 多种操作方法（toggle、setTrue、setFalse）
+- ✅ 语义化的API设计
 - ✅ TypeScript 类型安全
+- ✅ 性能优化（使用useCallback）
 
 ---
 
@@ -133,35 +141,21 @@ function Modal() {
 ### 语法
 
 ```tsx
-const { count, increment, decrement, reset, set } = useCounter(
-  initialValue?: number,
-  options?: UseCounterOptions
-)
+const { count, increment, decrement, reset, setCount } = useCounter(initialValue?: number)
 ```
 
 ### 参数
 
 - `initialValue` (number, 可选): 初始值，默认为 `0`
-- `options` (UseCounterOptions, 可选): 配置选项
-
-### UseCounterOptions
-
-```tsx
-interface UseCounterOptions {
-  min?: number        // 最小值
-  max?: number        // 最大值
-  step?: number       // 步长，默认为 1
-}
-```
 
 ### 返回值
 
 返回一个对象，包含：
 - `count` (number): 当前计数值
-- `increment` (function): 增加函数
-- `decrement` (function): 减少函数
-- `reset` (function): 重置到初始值
-- `set` (function): 设置特定值
+- `increment` (function): 增加计数的函数
+- `decrement` (function): 减少计数的函数
+- `reset` (function): 重置计数的函数
+- `setCount` (function): 设置特定值的函数，支持函数式更新
 
 ### 示例
 
@@ -169,20 +163,25 @@ interface UseCounterOptions {
 import { useCounter } from 'joy-at-meeting'
 
 function QuantitySelector() {
-  const { count, increment, decrement, reset, set } = useCounter(1, {
-    min: 1,
-    max: 99,
-    step: 1
-  })
+  const { count, increment, decrement, reset, setCount } = useCounter(1)
+
+  const handleDecrement = () => {
+    if (count > 1) decrement()
+  }
+
+  const handleIncrement = () => {
+    if (count < 99) increment()
+  }
 
   return (
     <div>
-      <button onClick={decrement} disabled={count <= 1}>-</button>
+      <button onClick={handleDecrement} disabled={count <= 1}>-</button>
       <span>数量: {count}</span>
-      <button onClick={increment} disabled={count >= 99}>+</button>
+      <button onClick={handleIncrement} disabled={count >= 99}>+</button>
       
       <div>
-        <button onClick={() => set(10)}>设为 10</button>
+        <button onClick={() => setCount(10)}>设为 10</button>
+        <button onClick={() => setCount(prev => prev + 5)}>+5</button>
         <button onClick={reset}>重置</button>
       </div>
     </div>
@@ -194,8 +193,8 @@ function QuantitySelector() {
 
 ```tsx
 function ScoreBoard() {
-  const playerA = useCounter(0, { min: 0, step: 1 })
-  const playerB = useCounter(0, { min: 0, step: 1 })
+  const playerA = useCounter(0)
+  const playerB = useCounter(0)
 
   const resetGame = () => {
     playerA.reset()
@@ -207,16 +206,16 @@ function ScoreBoard() {
       <div>
         <h3>玩家 A: {playerA.count}</h3>
         <button onClick={playerA.increment}>+1</button>
-        <button onClick={() => playerA.set(playerA.count + 5)}>+5</button>
+        <button onClick={() => playerA.setCount(prev => prev + 5)}>+5</button>
       </div>
       
       <div>
         <h3>玩家 B: {playerB.count}</h3>
         <button onClick={playerB.increment}>+1</button>
-        <button onClick={() => playerB.set(playerB.count + 5)}>+5</button>
+        <button onClick={() => playerB.setCount(prev => prev + 5)}>+5</button>
       </div>
       
-      <button onClick={resetGame}>重新开始</button>
+      <button onClick={resetGame}>重置游戏</button>
     </div>
   )
 }
@@ -224,10 +223,11 @@ function ScoreBoard() {
 
 ### 特性
 
-- ✅ 支持最小值/最大值限制
-- ✅ 可配置步长
+- ✅ 简洁的API设计
+- ✅ 支持函数式更新
 - ✅ 丰富的操作方法
 - ✅ TypeScript 类型安全
+- ✅ 性能优化（使用useCallback）
 
 ---
 

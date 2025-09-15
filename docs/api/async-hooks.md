@@ -9,9 +9,8 @@
 ### 语法
 
 ```tsx
-const { data, loading, error, execute } = useAsync<T>(
-  asyncFunction: () => Promise<T>,
-  dependencies?: any[],
+const { data, error, status, isLoading, isSuccess, isError, execute, reset } = useAsync<T>(
+  asyncFunction: (...args: any[]) => Promise<T>,
   immediate?: boolean
 )
 ```
@@ -19,35 +18,46 @@ const { data, loading, error, execute } = useAsync<T>(
 ### 参数
 
 - `asyncFunction` (function): 返回 Promise 的异步函数
-- `dependencies` (array, 可选): 依赖数组，变化时重新执行
-- `immediate` (boolean, 可选): 是否立即执行，默认为 `true`
+- `immediate` (boolean, 可选): 是否立即执行，默认为 `false`
 
 ### 返回值
 
 返回一个对象，包含：
 - `data` (T | null): 异步操作的结果数据
-- `loading` (boolean): 是否正在加载
 - `error` (Error | null): 错误信息
+- `status` (AsyncStatus): 当前状态 ('idle' | 'pending' | 'success' | 'error')
+- `isLoading` (boolean): 是否正在加载
+- `isSuccess` (boolean): 是否成功
+- `isError` (boolean): 是否出错
 - `execute` (function): 手动执行异步函数
+- `reset` (function): 重置状态
 
 ### 基础示例
 
 ```tsx
 import { useAsync } from 'joy-at-meeting'
+import { useEffect } from 'react'
 
 function UserProfile({ userId }: { userId: string }) {
-  const fetchUser = async () => {
-    const response = await fetch(`/api/users/${userId}`)
+  const fetchUser = async (id: string) => {
+    const response = await fetch(`/api/users/${id}`)
     if (!response.ok) {
       throw new Error('获取用户信息失败')
     }
     return response.json()
   }
 
-  const { data: user, loading, error } = useAsync(fetchUser, [userId])
+  const { data: user, isLoading, isError, error, execute, reset } = useAsync(fetchUser)
 
-  if (loading) return <div>加载中...</div>
-  if (error) return <div>错误: {error.message}</div>
+  // 当userId变化时重新获取用户信息
+  useEffect(() => {
+    if (userId) {
+      execute(userId)
+    }
+  }, [userId, execute])
+
+  if (isLoading) return <div>加载中...</div>
+  if (isError) return <div>错误: {error?.message}</div>
   if (!user) return <div>用户不存在</div>
 
   return (
@@ -85,9 +95,8 @@ function CreateUser() {
     return response.json()
   }
 
-  const { data: newUser, loading, error, execute } = useAsync(
+  const { data: newUser, isLoading, error, execute } = useAsync(
     createUser,
-    [],
     false // 不立即执行
   )
 
@@ -112,8 +121,8 @@ function CreateUser() {
         required
       />
       
-      <button type="submit" disabled={loading}>
-        {loading ? '创建中...' : '创建用户'}
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? '创建中...' : '创建用户'}
       </button>
       
       {error && <p style={{ color: 'red' }}>错误: {error.message}</p>}
@@ -143,7 +152,7 @@ function PostList() {
     return data
   }
 
-  const { data, loading, error, execute } = useAsync(fetchPosts, [page])
+  const { data, isLoading, error, execute } = useAsync(fetchPosts)
 
   const loadMore = () => {
     setPage(prev => prev + 1)
@@ -157,10 +166,10 @@ function PostList() {
   return (
     <div>
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        <button onClick={refresh} disabled={loading}>
+        <button onClick={refresh} disabled={isLoading}>
           刷新
         </button>
-        <button onClick={execute} disabled={loading}>
+        <button onClick={execute} disabled={isLoading}>
           重新加载
         </button>
       </div>
@@ -177,8 +186,8 @@ function PostList() {
       </div>
       
       {data?.hasMore && (
-        <button onClick={loadMore} disabled={loading}>
-          {loading ? '加载中...' : '加载更多'}
+        <button onClick={loadMore} disabled={isLoading}>
+          {isLoading ? '加载中...' : '加载更多'}
         </button>
       )}
     </div>
@@ -198,50 +207,76 @@ function PostList() {
 
 ## useFetch
 
-HTTP 请求的封装，基于 `useAsync` 实现。
+HTTP 请求的封装，基于 `useAsync` 实现，提供更便捷的网络请求功能。
 
 ### 语法
 
 ```tsx
-const { data, loading, error, refetch } = useFetch<T>(
-  url: string,
-  options?: RequestInit,
-  dependencies?: any[]
+const { data, error, status, isLoading, isSuccess, isError, execute, reset, refetch } = useFetch<T>(
+  initialUrl?: string,
+  initialOptions?: FetchOptions,
+  immediate?: boolean
 )
 ```
 
 ### 参数
 
-- `url` (string): 请求的 URL
-- `options` (RequestInit, 可选): fetch 选项
-- `dependencies` (array, 可选): 依赖数组，变化时重新请求
+- `initialUrl` (string, 可选): 初始请求URL
+- `initialOptions` (FetchOptions, 可选): 初始请求选项
+- `immediate` (boolean, 可选): 是否立即执行请求，默认为 `false`
+
+### FetchOptions
+
+```tsx
+interface FetchOptions extends Omit<RequestInit, 'method' | 'body'> {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  data?: any                                    // 请求体数据
+  params?: Record<string, string | number | boolean>  // 查询参数
+  baseURL?: string                             // 基础URL
+  timeout?: number                             // 请求超时时间（毫秒）
+}
+```
 
 ### 返回值
 
 返回一个对象，包含：
 - `data` (T | null): 响应数据
-- `loading` (boolean): 是否正在加载
 - `error` (Error | null): 错误信息
+- `status` (AsyncStatus): 当前状态
+- `isLoading` (boolean): 是否正在加载
+- `isSuccess` (boolean): 是否成功
+- `isError` (boolean): 是否出错
+- `execute` (function): 执行请求函数
+- `reset` (function): 重置状态
 - `refetch` (function): 重新请求函数
 
 ### 基础示例
 
 ```tsx
 import { useFetch } from 'joy-at-meeting'
+import { useEffect } from 'react'
 
 function WeatherWidget({ city }: { city: string }) {
-  const { data: weather, loading, error, refetch } = useFetch(
-    `/api/weather?city=${city}`,
-    {
-      headers: {
-        'Authorization': 'Bearer your-api-key'
-      }
-    },
-    [city] // 城市变化时重新请求
-  )
+  const { data: weather, isLoading, isError, error, execute, refetch } = useFetch<{
+    temperature: number
+    description: string
+    humidity: number
+  }>()
 
-  if (loading) return <div>获取天气信息中...</div>
-  if (error) return <div>获取天气失败: {error.message}</div>
+  // 当城市变化时重新请求
+  useEffect(() => {
+    if (city) {
+      execute('/api/weather', {
+        params: { city },
+        headers: {
+          'Authorization': 'Bearer your-api-key'
+        }
+      })
+    }
+  }, [city, execute])
+
+  if (isLoading) return <div>获取天气信息中...</div>
+  if (isError) return <div>获取天气失败: {error?.message}</div>
 
   return (
     <div>
@@ -262,39 +297,38 @@ function WeatherWidget({ city }: { city: string }) {
 ### POST 请求示例
 
 ```tsx
+import { useState } from 'react'
+
 function CommentForm({ postId }: { postId: string }) {
   const [comment, setComment] = useState('')
-  const [shouldSubmit, setShouldSubmit] = useState(false)
+  const { data, isLoading, isError, error, execute, reset } = useFetch<{
+    id: string
+    content: string
+    createdAt: string
+  }>()
 
-  const { data, loading, error } = useFetch(
-    '/api/comments',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        postId,
-        content: comment
-      })
-    },
-    [shouldSubmit] // 只有当 shouldSubmit 为 true 时才发送请求
-  )
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (comment.trim()) {
-      setShouldSubmit(true)
+      await execute('/api/comments', {
+        method: 'POST',
+        data: {
+          postId,
+          content: comment
+        }
+      })
+      
+      // 成功后清空表单
+      if (!isError) {
+        setComment('')
+      }
     }
   }
 
-  useEffect(() => {
-    if (data && !loading && !error) {
-      setComment('')
-      setShouldSubmit(false)
-      console.log('评论提交成功:', data)
-    }
-  }, [data, loading, error])
+  const handleReset = () => {
+    setComment('')
+    reset()
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -303,130 +337,67 @@ function CommentForm({ postId }: { postId: string }) {
         onChange={(e) => setComment(e.target.value)}
         placeholder="写下你的评论..."
         rows={4}
-        style={{ width: '100%' }}
+        required
       />
       
-      <button type="submit" disabled={loading || !comment.trim()}>
-        {loading ? '提交中...' : '提交评论'}
-      </button>
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? '发布中...' : '发布评论'}
+        </button>
+        <button type="button" onClick={handleReset}>
+          重置
+        </button>
+      </div>
       
-      {error && <p style={{ color: 'red' }}>提交失败: {error.message}</p>}
-      {data && <p style={{ color: 'green' }}>评论提交成功!</p>}
+      {isError && <p style={{ color: 'red' }}>发布失败: {error?.message}</p>}
+      {data && <p style={{ color: 'green' }}>评论发布成功!</p>}
     </form>
   )
 }
+
 ```
 
-### 条件请求
+### 条件请求示例
 
 ```tsx
 function UserDashboard({ userId }: { userId?: string }) {
+  const { data: user, isLoading, isError, error, execute } = useFetch<{
+    name: string
+    email: string
+    stats: {
+      posts: number
+      followers: number
+    }
+  }>()
+
   // 只有当 userId 存在时才发送请求
-  const shouldFetch = Boolean(userId)
-  
-  const { data: user, loading, error } = useFetch(
-    userId ? `/api/users/${userId}/dashboard` : '',
-    {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    },
-    [userId, shouldFetch]
-  )
+  useEffect(() => {
+    if (userId) {
+      execute(`/api/users/${userId}/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+    }
+  }, [userId, execute])
 
   if (!userId) {
     return <div>请先登录</div>
   }
 
-  if (loading) return <div>加载用户数据中...</div>
-  if (error) return <div>加载失败: {error.message}</div>
+  if (isLoading) return <div>加载用户信息中...</div>
+  if (isError) return <div>加载失败: {error?.message}</div>
 
   return (
     <div>
-      <h2>欢迎, {user?.name}</h2>
-      <div>
-        <h3>统计信息</h3>
-        <p>文章数: {user?.stats.posts}</p>
-        <p>评论数: {user?.stats.comments}</p>
-        <p>点赞数: {user?.stats.likes}</p>
-      </div>
-    </div>
-  )
-}
-```
-
-### 分页数据
-
-```tsx
-function ProductList() {
-  const [page, setPage] = useState(1)
-  const [category, setCategory] = useState('all')
-  
-  const { data, loading, error, refetch } = useFetch(
-    `/api/products?page=${page}&category=${category}&limit=12`,
-    {},
-    [page, category]
-  )
-
-  const handleCategoryChange = (newCategory: string) => {
-    setCategory(newCategory)
-    setPage(1) // 重置到第一页
-  }
-
-  return (
-    <div>
-      <div style={{ marginBottom: '1rem' }}>
-        <select 
-          value={category} 
-          onChange={(e) => handleCategoryChange(e.target.value)}
-        >
-          <option value="all">全部分类</option>
-          <option value="electronics">电子产品</option>
-          <option value="clothing">服装</option>
-          <option value="books">图书</option>
-        </select>
-        
-        <button onClick={refetch} disabled={loading}>
-          刷新
-        </button>
-      </div>
-      
-      {loading && <div>加载中...</div>}
-      {error && <div>加载失败: {error.message}</div>}
-      
-      {data && (
+      <h2>用户仪表板</h2>
+      {user && (
         <div>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-            gap: '1rem' 
-          }}>
-            {data.products.map((product: any) => (
-              <div key={product.id} style={{ border: '1px solid #ccc', padding: '1rem' }}>
-                <h4>{product.name}</h4>
-                <p>{product.price}</p>
-              </div>
-            ))}
-          </div>
-          
-          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-            <button 
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1 || loading}
-            >
-              上一页
-            </button>
-            
-            <span style={{ margin: '0 1rem' }}>
-              第 {page} 页，共 {data.totalPages} 页
-            </span>
-            
-            <button 
-              onClick={() => setPage(p => p + 1)}
-              disabled={page >= data.totalPages || loading}
-            >
-              下一页
-            </button>
+          <h3>欢迎, {user.name}!</h3>
+          <p>邮箱: {user.email}</p>
+          <div>
+            <p>发布文章: {user.stats.posts}</p>
+            <p>关注者: {user.stats.followers}</p>
           </div>
         </div>
       )}
@@ -435,58 +406,27 @@ function ProductList() {
 }
 ```
 
-### 错误重试
-
-```tsx
-function DataWithRetry() {
-  const [retryCount, setRetryCount] = useState(0)
-  
-  const { data, loading, error, refetch } = useFetch(
-    '/api/unreliable-endpoint',
-    {},
-    [retryCount]
-  )
-
-  const handleRetry = () => {
-    setRetryCount(prev => prev + 1)
-  }
-
-  if (loading) {
-    return (
-      <div>
-        加载中... {retryCount > 0 && `(重试第 ${retryCount} 次)`}
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div>
-        <p style={{ color: 'red' }}>加载失败: {error.message}</p>
-        <button onClick={handleRetry}>
-          重试 {retryCount > 0 && `(${retryCount})`}
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <div>
-      <h3>数据加载成功</h3>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
-  )
-}
-```
-
 ### 特性
 
-- ✅ 基于 fetch API
-- ✅ 自动 JSON 解析
-- ✅ 支持所有 HTTP 方法
-- ✅ 错误处理
-- ✅ 依赖数组自动重新请求
+- ✅ 基于 useAsync 构建，继承所有异步状态管理功能
+- ✅ 支持多种 HTTP 方法（GET、POST、PUT、DELETE、PATCH）
+- ✅ 自动处理请求体序列化和查询参数
+- ✅ 支持请求超时设置
+- ✅ 灵活的配置选项
 - ✅ TypeScript 类型安全
+- ✅ 错误处理和重试机制
+- ✅ 支持条件请求和手动触发
+
+---
+
+## 总结
+
+`useAsync` 和 `useFetch` 提供了强大而灵活的异步操作管理能力：
+
+- **useAsync**: 通用异步操作管理，适用于任何返回 Promise 的函数
+- **useFetch**: 专门针对 HTTP 请求优化，提供更便捷的网络请求功能
+
+两个 hooks 都提供了完整的状态管理、错误处理和 TypeScript 支持，让你能够轻松处理各种异步场景。
 
 ## 组合使用
 
@@ -504,11 +444,19 @@ function SmartSearch() {
   const [searchHistory, setSearchHistory] = useLocalStorage('searchHistory', [])
   const debouncedQuery = useDebounce(query, 500)
   
-  const { data: results, loading, error } = useFetch(
-    debouncedQuery ? `/api/search?q=${debouncedQuery}` : '',
-    {},
-    [debouncedQuery]
-  )
+  const { data: results, isLoading, error, execute } = useFetch<{
+    total: number
+    items: Array<{ id: string; title: string }>
+  }>()
+  
+  // 当搜索词变化时执行搜索
+  useEffect(() => {
+    if (debouncedQuery) {
+      execute('/api/search', {
+        params: { q: debouncedQuery }
+      })
+    }
+  }, [debouncedQuery, execute])
   
   const handleSearch = (searchTerm: string) => {
     setQuery(searchTerm)
@@ -525,7 +473,7 @@ function SmartSearch() {
         placeholder="搜索..."
       />
       
-      {loading && <div>搜索中...</div>}
+      {isLoading && <div>搜索中...</div>}
       {error && <div>搜索失败: {error.message}</div>}
       
       {results && (

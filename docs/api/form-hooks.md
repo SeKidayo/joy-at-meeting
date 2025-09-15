@@ -1114,3 +1114,426 @@ function AdvancedContactForm() {
 ```
 
 这个示例展示了如何组合使用表单 hooks 与其他 hooks 来创建一个功能丰富的联系表单，包括草稿保存、字符计数、实时验证等功能。
+
+## useValidation
+
+强大的表单验证 hook，提供丰富的内置验证规则和自定义验证功能。
+
+### 语法
+
+```tsx
+const { validate, validateAll, createValidator } = useValidation({
+  rules: ValidationRule[],
+  stopOnFirstError?: boolean
+})
+```
+
+### 参数
+
+- `rules` (ValidationRule[]): 验证规则数组
+- `stopOnFirstError` (boolean, 可选): 是否在第一个错误时停止验证，默认为 true
+
+### 返回值
+
+返回一个对象，包含：
+- `validate` (function): 验证单个值的函数
+- `validateAll` (function): 验证多个值的函数
+- `createValidator` (function): 创建验证器的函数
+
+### 内置验证规则
+
+```tsx
+import { validationRules } from 'joy-at-meeting'
+
+// 必填验证
+validationRules.required('此字段为必填项')
+
+// 长度验证
+validationRules.minLength(3, '最少3个字符')
+validationRules.maxLength(50, '最多50个字符')
+
+// 数值验证
+validationRules.min(0, '最小值为0')
+validationRules.max(100, '最大值为100')
+
+// 格式验证
+validationRules.email('请输入有效的邮箱地址')
+validationRules.phone('请输入有效的手机号码')
+validationRules.url('请输入有效的URL')
+validationRules.number('请输入有效的数字')
+validationRules.integer('请输入有效的整数')
+
+// 正则表达式验证
+validationRules.pattern(/^[a-zA-Z0-9]+$/, '只能包含字母和数字')
+
+// 密码验证
+validationRules.password({
+  minLength: 8,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumbers: true,
+  requireSpecialChars: true
+}, '密码不符合要求')
+
+// 确认密码验证
+validationRules.confirmPassword(passwordValue, '密码不匹配')
+```
+
+### 基础示例
+
+```tsx
+import { useValidation, validationRules } from 'joy-at-meeting'
+
+function ValidationExample() {
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState<string | undefined>()
+  
+  const { validate } = useValidation({
+    rules: [
+      validationRules.required('邮箱不能为空'),
+      validationRules.email('请输入有效的邮箱地址')
+    ]
+  })
+  
+  const handleEmailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setEmail(value)
+    
+    const validationError = await validate(value, 'email')
+    setError(validationError)
+  }
+  
+  return (
+    <div>
+      <input
+        type="email"
+        value={email}
+        onChange={handleEmailChange}
+        placeholder="请输入邮箱"
+        style={{
+          padding: '8px',
+          borderColor: error ? 'red' : '#ccc'
+        }}
+      />
+      {error && (
+        <div style={{ color: 'red', fontSize: '14px' }}>
+          {error}
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+### 批量验证示例
+
+```tsx
+interface FormData {
+  username: string
+  email: string
+  password: string
+  confirmPassword: string
+  age: number
+}
+
+function BatchValidationExample() {
+  const [formData, setFormData] = useState<FormData>({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    age: 0
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  
+  const { validateAll, createValidator } = useValidation()
+  
+  // 为不同字段创建不同的验证器
+  const validators = {
+    username: createValidator([
+      validationRules.required('用户名不能为空'),
+      validationRules.minLength(3, '用户名至少3个字符'),
+      validationRules.pattern(/^[a-zA-Z0-9_]+$/, '用户名只能包含字母、数字和下划线')
+    ]),
+    email: createValidator([
+      validationRules.required('邮箱不能为空'),
+      validationRules.email('请输入有效的邮箱地址')
+    ]),
+    password: createValidator([
+      validationRules.required('密码不能为空'),
+      validationRules.password({
+        minLength: 8,
+        requireUppercase: true,
+        requireLowercase: true,
+        requireNumbers: true
+      }, '密码必须包含大小写字母、数字，且至少8位')
+    ]),
+    confirmPassword: createValidator([
+      validationRules.required('请确认密码'),
+      validationRules.confirmPassword(formData.password, '密码不匹配')
+    ]),
+    age: createValidator([
+      validationRules.required('年龄不能为空'),
+      validationRules.min(18, '年龄必须大于等于18岁'),
+      validationRules.max(120, '年龄必须小于等于120岁')
+    ])
+  }
+  
+  const validateForm = async () => {
+    const validationPromises = Object.entries(formData).map(
+      async ([field, value]) => {
+        const validator = validators[field as keyof typeof validators]
+        if (validator) {
+          const error = await validator(value, field)
+          return { field, error }
+        }
+        return { field, error: undefined }
+      }
+    )
+    
+    const results = await Promise.all(validationPromises)
+    const newErrors: Record<string, string> = {}
+    
+    results.forEach(({ field, error }) => {
+      if (error) {
+        newErrors[field] = error
+      }
+    })
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    const isValid = await validateForm()
+    if (isValid) {
+      console.log('表单验证通过:', formData)
+    } else {
+      console.log('表单验证失败:', errors)
+    }
+  }
+  
+  const handleFieldChange = (field: keyof FormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    
+    // 清除该字段的错误
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }
+  
+  return (
+    <form onSubmit={handleSubmit} style={{ maxWidth: '400px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '1rem' }}>
+        <label>用户名</label>
+        <input
+          type="text"
+          value={formData.username}
+          onChange={(e) => handleFieldChange('username', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            borderColor: errors.username ? 'red' : '#ccc'
+          }}
+        />
+        {errors.username && (
+          <div style={{ color: 'red', fontSize: '12px' }}>
+            {errors.username}
+          </div>
+        )}
+      </div>
+      
+      <div style={{ marginBottom: '1rem' }}>
+        <label>邮箱</label>
+        <input
+          type="email"
+          value={formData.email}
+          onChange={(e) => handleFieldChange('email', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            borderColor: errors.email ? 'red' : '#ccc'
+          }}
+        />
+        {errors.email && (
+          <div style={{ color: 'red', fontSize: '12px' }}>
+            {errors.email}
+          </div>
+        )}
+      </div>
+      
+      <div style={{ marginBottom: '1rem' }}>
+        <label>密码</label>
+        <input
+          type="password"
+          value={formData.password}
+          onChange={(e) => handleFieldChange('password', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            borderColor: errors.password ? 'red' : '#ccc'
+          }}
+        />
+        {errors.password && (
+          <div style={{ color: 'red', fontSize: '12px' }}>
+            {errors.password}
+          </div>
+        )}
+      </div>
+      
+      <div style={{ marginBottom: '1rem' }}>
+        <label>确认密码</label>
+        <input
+          type="password"
+          value={formData.confirmPassword}
+          onChange={(e) => handleFieldChange('confirmPassword', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            borderColor: errors.confirmPassword ? 'red' : '#ccc'
+          }}
+        />
+        {errors.confirmPassword && (
+          <div style={{ color: 'red', fontSize: '12px' }}>
+            {errors.confirmPassword}
+          </div>
+        )}
+      </div>
+      
+      <div style={{ marginBottom: '1rem' }}>
+        <label>年龄</label>
+        <input
+          type="number"
+          value={formData.age}
+          onChange={(e) => handleFieldChange('age', parseInt(e.target.value) || 0)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            borderColor: errors.age ? 'red' : '#ccc'
+          }}
+        />
+        {errors.age && (
+          <div style={{ color: 'red', fontSize: '12px' }}>
+            {errors.age}
+          </div>
+        )}
+      </div>
+      
+      <button
+        type="submit"
+        style={{
+          width: '100%',
+          padding: '12px',
+          backgroundColor: '#007bff',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
+        提交
+      </button>
+    </form>
+  )
+}
+```
+
+### 自定义验证规则
+
+```tsx
+// 创建自定义验证规则
+const customValidationRule: ValidationRule<string> = (value, fieldName) => {
+  if (value && value.includes('admin')) {
+    return '用户名不能包含"admin"'
+  }
+  return undefined
+}
+
+// 异步验证规则
+const asyncValidationRule: ValidationRule<string> = async (value) => {
+  if (!value) return undefined
+  
+  try {
+    const response = await fetch(`/api/check-username?username=${value}`)
+    const data = await response.json()
+    
+    if (!data.available) {
+      return '用户名已被占用'
+    }
+  } catch (error) {
+    return '验证用户名时发生错误'
+  }
+  
+  return undefined
+}
+
+function CustomValidationExample() {
+  const [username, setUsername] = useState('')
+  const [error, setError] = useState<string | undefined>()
+  const [isValidating, setIsValidating] = useState(false)
+  
+  const { validate } = useValidation({
+    rules: [
+      validationRules.required('用户名不能为空'),
+      validationRules.minLength(3, '用户名至少3个字符'),
+      customValidationRule,
+      asyncValidationRule
+    ],
+    stopOnFirstError: true
+  })
+  
+  const handleUsernameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setUsername(value)
+    setIsValidating(true)
+    
+    try {
+      const validationError = await validate(value, 'username')
+      setError(validationError)
+    } finally {
+      setIsValidating(false)
+    }
+  }
+  
+  return (
+    <div>
+      <input
+        type="text"
+        value={username}
+        onChange={handleUsernameChange}
+        placeholder="请输入用户名"
+        style={{
+          padding: '8px',
+          borderColor: error ? 'red' : '#ccc'
+        }}
+      />
+      {isValidating && (
+        <div style={{ color: '#666', fontSize: '12px' }}>
+          验证中...
+        </div>
+      )}
+      {error && !isValidating && (
+        <div style={{ color: 'red', fontSize: '12px' }}>
+          {error}
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+### 特性
+
+- **丰富的内置验证规则**: 提供常用的验证规则，如必填、长度、格式等
+- **自定义验证规则**: 支持创建自定义的同步和异步验证规则
+- **批量验证**: 可以同时验证多个字段
+- **错误控制**: 支持在第一个错误时停止验证或收集所有错误
+- **TypeScript 支持**: 完整的类型定义和类型安全
+- **性能优化**: 使用 useMemo 和 useCallback 优化性能
+- **灵活组合**: 可以与其他 hooks 灵活组合使用

@@ -11,8 +11,9 @@ DOM 操作相关的 React hooks，帮助你更优雅地处理 DOM 交互。
 ```tsx
 useClickOutside<T extends HTMLElement>(
   ref: RefObject<T>,
-  handler: (event: MouseEvent | TouchEvent) => void,
-  events?: ('mousedown' | 'mouseup' | 'touchstart' | 'touchend')[]
+  handler: (event: Event) => void,
+  mouseEvent?: keyof DocumentEventMap,
+  touchEvent?: keyof DocumentEventMap
 )
 ```
 
@@ -20,7 +21,8 @@ useClickOutside<T extends HTMLElement>(
 
 - `ref` (RefObject): 要监听的元素引用
 - `handler` (function): 点击外部时的回调函数
-- `events` (array, 可选): 要监听的事件类型，默认为 `['mousedown', 'touchstart']`
+- `mouseEvent` (string, 可选): 要监听的鼠标事件类型，默认为 `'mousedown'`
+- `touchEvent` (string, 可选): 要监听的触摸事件类型，默认为 `'touchstart'`
 
 ### 示例
 
@@ -64,7 +66,7 @@ function Modal() {
   // 只监听 mousedown 事件
   useClickOutside(modalRef, () => {
     setIsOpen(false)
-  }, ['mousedown'])
+  }, 'mousedown')
 
   if (!isOpen) return null
 
@@ -97,7 +99,8 @@ const { x, y } = useScrollPosition(options?: UseScrollPositionOptions)
 ```tsx
 interface UseScrollPositionOptions {
   element?: RefObject<HTMLElement>  // 要监听的元素，默认为 window
-  throttleMs?: number              // 节流时间，默认为 100ms
+  useWindow?: boolean              // 是否监听 window 滚动，默认为 true
+  wait?: number                    // 节流延迟时间（毫秒），默认为 100
 }
 ```
 
@@ -142,7 +145,8 @@ function ScrollableContent() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { x, y } = useScrollPosition({ 
     element: containerRef,
-    throttleMs: 50 // 更频繁的更新
+    useWindow: false,
+    wait: 50 // 更频繁的更新
   })
 
   return (
@@ -269,8 +273,8 @@ const [isHovered, hoverProps] = useHover<T extends HTMLElement>(
 
 ```tsx
 interface UseHoverOptions {
-  delayEnter?: number  // 鼠标进入延迟，默认为 0
-  delayLeave?: number  // 鼠标离开延迟，默认为 0
+  enterDelay?: number  // 鼠标进入延迟（毫秒），默认为 0
+  leaveDelay?: number  // 鼠标离开延迟（毫秒），默认为 0
 }
 ```
 
@@ -312,8 +316,8 @@ function HoverCard() {
 ```tsx
 function TooltipTrigger() {
   const [isHovered, hoverProps] = useHover({
-    delayEnter: 500,  // 500ms 后显示
-    delayLeave: 200   // 200ms 后隐藏
+    enterDelay: 500,  // 500ms 后显示
+    leaveDelay: 200   // 200ms 后隐藏
   })
 
   return (
@@ -457,7 +461,8 @@ const isPressed = useKeyCombo(
 ```tsx
 interface UseKeyPressOptions {
   target?: RefObject<HTMLElement>  // 监听目标，默认为 window
-  event?: 'keydown' | 'keyup'     // 监听事件类型，默认为 'keydown'
+  eventType?: 'keydown' | 'keyup' // 监听事件类型，默认为 'keydown'
+  useKeyCombo?: boolean           // 是否使用组合键模式，默认为 false
 }
 ```
 
@@ -625,7 +630,7 @@ const { width, height } = useWindowSize(options?: UseWindowSizeOptions)
 
 ```tsx
 interface UseWindowSizeOptions {
-  debounceMs?: number  // 防抖时间，默认为 100ms
+  wait?: number  // 防抖延迟时间（毫秒），默认为 100
 }
 ```
 
