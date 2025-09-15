@@ -1,6 +1,6 @@
 {
   "name": "joy-at-meeting",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha",
   "description": "A collection of elegant and useful React hooks",
   "type": "module",
   "main": "dist/index.js",
