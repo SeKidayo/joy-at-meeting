@@ -5,6 +5,8 @@ on:
   # 推送到任何分支
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
   
   # Pull Request 到 main 分支
   pull_request:
