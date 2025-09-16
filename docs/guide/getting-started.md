@@ -1,23 +1,24 @@
 # 快速开始
 
-欢迎使用 Joy at Meeting！这是一个专为 React 开发者设计的 hooks 库，旨在提供优雅、实用的解决方案。
+欢迎使用 Joy At Meeting！这是一个专为 React 开发者设计的 hooks 库，旨在提供优雅、实用的解决方案。
 
 ## 安装
 
-使用 npm：
-```bash
+::: code-group
+
+```bash [npm]
 npm install joy-at-meeting
 ```
 
-使用 yarn：
-```bash
+```bash [yarn]
 yarn add joy-at-meeting
 ```
 
-使用 pnpm：
-```bash
+```bash [pnpm]
 pnpm add joy-at-meeting
 ```
+
+:::
 
 ## 基本使用
 
@@ -45,7 +46,7 @@ function MyComponent() {
 
 ### TypeScript 支持
 
-Joy at Meeting 完全使用 TypeScript 编写，提供完整的类型定义：
+Joy At Meeting 完全使用 TypeScript 编写，提供完整的类型定义：
 
 ```tsx
 import { useCounter, UseCounterOptions } from 'joy-at-meeting'
@@ -99,11 +100,3 @@ function Counter() {
 - [安装指南](/guide/installation) - 详细的安装说明
 - [基本用法](/guide/basic-usage) - 更多使用示例
 - [API 文档](/api/state-hooks) - 完整的 API 参考
-
-## 需要帮助？
-
-如果你遇到任何问题或有建议，欢迎：
-
-- 查看 [GitHub Issues](https://github.com/SeKidayo/joy-at-meeting/issues)
-- 提交 [Bug 报告](https://github.com/SeKidayo/joy-at-meeting/issues/new)
-- 参与 [讨论](https://github.com/SeKidayo/joy-at-meeting/discussions)

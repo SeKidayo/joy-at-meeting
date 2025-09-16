@@ -1,6 +1,18 @@
-# Performance Hooks
+# 性能优化 Hooks
 
-性能优化相关的 React hooks，帮助你提升应用性能和用户体验。
+性能优化是构建高质量 React 应用的关键。Joy At Meeting 提供了一系列专门用于性能优化的 hooks，帮助你避免不必要的渲染、优化计算和提升用户体验。
+
+## 概览
+
+| Hook | 描述 | 主要用途 |
+|------|------|----------|
+| `useDebounce` | 防抖处理 | 搜索输入、API 调用优化 |
+| `useThrottle` | 节流处理 | 滚动事件、窗口调整 |
+| `useMemoizedCallback` | 记忆化回调 | 避免子组件不必要渲染 |
+| `useDeepMemo` | 深度记忆化 | 复杂对象比较和缓存 |
+| `useVirtualList` | 虚拟列表 | 大数据集渲染优化 |
+| `useLazyLoad` | 懒加载 | 图片、组件按需加载 |
+| `useIntersectionObserver` | 交叉观察器 | 滚动监听、可见性检测 |
 
 ## useDebounce
 
