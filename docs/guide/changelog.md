@@ -20,9 +20,9 @@
 
 #### 状态管理 Hooks
 - `useLocalStorage` - 本地存储状态管理
-- `useToggle` - 布尔值切换状态
-- `useCounter` - 计数器状态管理
-- `usePrevious` - 获取上一次的值
+- `useSessionStorage` - 会话存储状态管理
+- `useToggle` - 布尔值切换状态管理
+- `usePrevious` - 获取前一个值
 
 #### DOM 操作 Hooks
 - `useClickOutside` - 点击外部区域检测

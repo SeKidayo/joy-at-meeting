@@ -57,42 +57,6 @@ pnpm add joy-at-meeting
 
 :::
 
-### 立即使用
-
-```tsx
-import { useLocalStorage, useToggle, useAsync } from 'joy-at-meeting'
-
-function App() {
-  // 持久化状态管理
-  const [theme, setTheme] = useLocalStorage('theme', 'light')
-  
-  // 简化布尔状态
-  const [isVisible, toggle] = useToggle(false)
-  
-  // 异步数据处理
-  const { data, loading, error } = useAsync(async () => {
-    const response = await fetch('/api/user')
-    return response.json()
-  })
-
-  return (
-    <div className={`app ${theme}`}>
-      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-        切换主题
-      </button>
-      
-      <button onClick={toggle}>
-        {isVisible ? '隐藏' : '显示'} 内容
-      </button>
-      
-      {loading && <div>加载中...</div>}
-      {error && <div>错误: {error.message}</div>}
-      {data && <div>用户: {data.name}</div>}
-    </div>
-  )
-}
-```
-
 ## 📊 项目数据
 
 <div class="stats-container">
@@ -117,10 +81,10 @@ function App() {
 ## 🎯 核心特性
 
 ### 状态管理
-- **useLocalStorage** - 持久化状态到本地存储
-- **useToggle** - 简化布尔值状态管理
-- **useCounter** - 计数器状态管理
-- **usePrevious** - 获取上一次的值
+- **useLocalStorage** - 本地存储状态管理
+- **useSessionStorage** - 会话存储状态管理
+- **useToggle** - 布尔值切换状态管理
+- **usePrevious** - 获取前一个值
 
 ### DOM 操作
 - **useClickOutside** - 检测元素外部点击

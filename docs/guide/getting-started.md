@@ -49,23 +49,18 @@ function MyComponent() {
 Joy At Meeting 完全使用 TypeScript 编写，提供完整的类型定义：
 
 ```tsx
-import { useCounter, UseCounterOptions } from 'joy-at-meeting'
+import { useToggle } from 'joy-at-meeting'
 
-function Counter() {
-  const options: UseCounterOptions = {
-    min: 0,
-    max: 100,
-    step: 5
-  }
-  
-  const { count, increment, decrement, reset } = useCounter(10, options)
+function ToggleExample() {
+  const [isVisible, toggle, setTrue, setFalse] = useToggle(false)
 
   return (
     <div>
-      <p>当前值: {count}</p>
-      <button onClick={increment}>+5</button>
-      <button onClick={decrement}>-5</button>
-      <button onClick={reset}>重置</button>
+      <p>状态: {isVisible ? '显示' : '隐藏'}</p>
+      <button onClick={toggle}>切换</button>
+      <button onClick={setTrue}>显示</button>
+      <button onClick={setFalse}>隐藏</button>
+      {isVisible && <p>这是一个可切换的内容</p>}
     </div>
   )
 }
@@ -89,7 +84,7 @@ function Counter() {
 - 无需复杂设置
 
 ### 🔧 功能丰富
-- **状态管理**: useLocalStorage, useToggle, useCounter
+- **状态管理**: useLocalStorage, useToggle
 - **DOM 操作**: useClickOutside, useScrollPosition, useElementSize
 - **异步处理**: useAsync, useFetch
 - **性能优化**: useDebounce, useThrottle, useMemoizedCallback

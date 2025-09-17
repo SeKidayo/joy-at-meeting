@@ -1,7 +1,6 @@
 // State management hooks
 export { useLocalStorage } from './hooks/state/useLocalStorage';
 export { useToggle } from './hooks/state/useToggle';
-export { useCounter } from './hooks/state/useCounter';
 
 // Async hooks
 export { useAsync } from './hooks/async/useAsync';
@@ -72,4 +71,3 @@ export { usePrevious } from './hooks/utils/usePrevious';
 // 导出类型定义
 export type { UseLocalStorageReturn } from './hooks/state/useLocalStorage';
 export type { UseToggleReturn } from './hooks/state/useToggle';
-export type { UseCounterReturn } from './hooks/state/useCounter';

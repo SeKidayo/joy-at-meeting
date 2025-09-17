@@ -134,103 +134,6 @@ function Modal() {
 
 ---
 
-## useCounter
-
-提供计数器功能，支持增减、重置等操作。
-
-### 语法
-
-```tsx
-const { count, increment, decrement, reset, setCount } = useCounter(initialValue?: number)
-```
-
-### 参数
-
-- `initialValue` (number, 可选): 初始值，默认为 `0`
-
-### 返回值
-
-返回一个对象，包含：
-- `count` (number): 当前计数值
-- `increment` (function): 增加计数的函数
-- `decrement` (function): 减少计数的函数
-- `reset` (function): 重置计数的函数
-- `setCount` (function): 设置特定值的函数，支持函数式更新
-
-### 示例
-
-```tsx
-import { useCounter } from 'joy-at-meeting'
-
-function QuantitySelector() {
-  const { count, increment, decrement, reset, setCount } = useCounter(1)
-
-  const handleDecrement = () => {
-    if (count > 1) decrement()
-  }
-
-  const handleIncrement = () => {
-    if (count < 99) increment()
-  }
-
-  return (
-    <div>
-      <button onClick={handleDecrement} disabled={count <= 1}>-</button>
-      <span>数量: {count}</span>
-      <button onClick={handleIncrement} disabled={count >= 99}>+</button>
-      
-      <div>
-        <button onClick={() => setCount(10)}>设为 10</button>
-        <button onClick={() => setCount(prev => prev + 5)}>+5</button>
-        <button onClick={reset}>重置</button>
-      </div>
-    </div>
-  )
-}
-```
-
-### 高级示例
-
-```tsx
-function ScoreBoard() {
-  const playerA = useCounter(0)
-  const playerB = useCounter(0)
-
-  const resetGame = () => {
-    playerA.reset()
-    playerB.reset()
-  }
-
-  return (
-    <div>
-      <div>
-        <h3>玩家 A: {playerA.count}</h3>
-        <button onClick={playerA.increment}>+1</button>
-        <button onClick={() => playerA.setCount(prev => prev + 5)}>+5</button>
-      </div>
-      
-      <div>
-        <h3>玩家 B: {playerB.count}</h3>
-        <button onClick={playerB.increment}>+1</button>
-        <button onClick={() => playerB.setCount(prev => prev + 5)}>+5</button>
-      </div>
-      
-      <button onClick={resetGame}>重置游戏</button>
-    </div>
-  )
-}
-```
-
-### 特性
-
-- ✅ 简洁的API设计
-- ✅ 支持函数式更新
-- ✅ 丰富的操作方法
-- ✅ TypeScript 类型安全
-- ✅ 性能优化（使用useCallback）
-
----
-
 ## usePrevious
 
 获取状态的前一个值。
@@ -328,7 +231,7 @@ function FormFieldTracker() {
 多个状态 hooks 可以组合使用：
 
 ```tsx
-import { useLocalStorage, useToggle, useCounter } from 'joy-at-meeting'
+import { useLocalStorage, useToggle } from 'joy-at-meeting'
 
 function GameSettings() {
   // 持久化游戏设置
@@ -340,15 +243,8 @@ function GameSettings() {
   // 控制设置面板显示
   const [showSettings, toggleSettings] = useToggle(false)
   
-  // 游戏分数
-  const { count: score, increment: addScore, reset: resetScore } = useCounter(0)
-  
   return (
     <div>
-      <div>分数: {score}</div>
-      <button onClick={addScore}>得分</button>
-      <button onClick={resetScore}>重置分数</button>
-      
       <button onClick={toggleSettings}>
         {showSettings ? '隐藏' : '显示'} 设置
       </button>

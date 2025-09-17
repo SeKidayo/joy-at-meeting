@@ -66,31 +66,7 @@ function ToggleExample() {
 }
 ```
 
-### useCounter
 
-计数器状态管理：
-
-```tsx
-import { useCounter } from 'joy-at-meeting'
-
-function CounterExample() {
-  const { count, increment, decrement, reset, set } = useCounter(0, {
-    min: 0,
-    max: 100,
-    step: 5
-  })
-
-  return (
-    <div>
-      <p>计数: {count}</p>
-      <button onClick={increment}>+5</button>
-      <button onClick={decrement}>-5</button>
-      <button onClick={() => set(50)}>设为 50</button>
-      <button onClick={reset}>重置</button>
-    </div>
-  )
-}
-```
 
 ## DOM 操作 Hooks
 

@@ -35,7 +35,6 @@ import React, { useRef } from 'react';
 import {
   useLocalStorage,
   useToggle,
-  useCounter,
   useHover,
   useClickOutside,
   useKeyPress
@@ -44,7 +43,6 @@ import {
 function App() {
   const [name, setName, removeName] = useLocalStorage('username', '');
   const [isVisible, toggle] = useToggle(false);
-  const [count, increment, decrement, reset] = useCounter(0);
   
   // DOM 交互示例
   const hoverRef = useRef<HTMLDivElement>(null);
@@ -94,10 +92,8 @@ function App() {
             margin: '10px 0'
           }}
         >
-          <p>计数: {count}</p>
-          <button onClick={increment}>+</button>
-          <button onClick={decrement}>-</button>
-          <button onClick={reset}>重置</button>
+          <p>用户名: {name}</p>
+          <p>状态: {isVisible ? '显示' : '隐藏'}</p>
           <p><small>点击外部区域关闭</small></p>
         </div>
       )}
@@ -145,23 +141,7 @@ const { value, toggle, setTrue, setFalse, setValue } = useToggle(initialValue);
 - `setFalse: () => void` - 设置为 false
 - `setValue: (value: boolean) => void` - 设置特定值
 
-#### useCounter
 
-管理计数器状态的 Hook，提供常用的计数操作。
-
-```tsx
-const { count, increment, decrement, reset, setCount } = useCounter(initialValue);
-```
-
-**参数:**
-- `initialValue?: number` - 初始计数值，默认为 0
-
-**返回值:**
-- `count: number` - 当前计数值
-- `increment: () => void` - 增加计数
-- `decrement: () => void` - 减少计数
-- `reset: () => void` - 重置计数
-- `setCount: (value: number | ((prev: number) => number)) => void` - 设置特定值
 
 ### 异步处理 Hooks
 
@@ -524,7 +504,7 @@ joy-at-meeting/
 │   │   │   ├── useMemoizedCallback.ts
 │   │   │   └── useThrottle.ts
 │   │   ├── state/              # 状态管理 Hooks
-│   │   │   ├── useCounter.ts
+
 │   │   │   ├── useLocalStorage.ts
 │   │   │   └── useToggle.ts
 │   │   └── utils/              # 工具 Hooks
