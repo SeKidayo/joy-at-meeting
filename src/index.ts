@@ -21,6 +21,7 @@ export { useElementSize } from './hooks/dom/useElementSize';
 export { useHover } from './hooks/dom/useHover';
 export { useFocus } from './hooks/dom/useFocus';
 export { useKeyPress, useKeyCombo } from './hooks/dom/useKeyPress';
+export { useClipboard } from './hooks/dom/useClipboard';
 export type {
   UseIntersectionObserverOptions,
   UseIntersectionObserverReturn,
@@ -37,6 +38,7 @@ export type { ElementSize } from './hooks/dom/useElementSize';
 export type { UseHoverOptions } from './hooks/dom/useHover';
 export type { UseFocusOptions, FocusState } from './hooks/dom/useFocus';
 export type { KeyType, UseKeyPressOptions } from './hooks/dom/useKeyPress';
+export type { UseClipboardReturn } from './hooks/dom/useClipboard';
 
 // Performance hooks
 export { useDebounce } from './hooks/performance/useDebounce';

@@ -56,6 +56,136 @@ function DropdownMenu() {
 }
 ```
 
+## useClipboard
+
+提供剪贴板操作功能的 Hook，支持复制文本、读取剪贴板内容等。
+
+### 语法
+
+```tsx
+useClipboard(options?: UseClipboardOptions): UseClipboardReturn
+```
+
+### 参数
+
+- `options` (UseClipboardOptions, 可选): 配置选项
+
+```tsx
+interface UseClipboardOptions {
+  timeout?: number;                        // 复制成功状态超时时间，默认 2000ms
+  onError?: (error: Error) => void;        // 错误回调
+  onSuccess?: (text: string) => void;      // 成功回调
+}
+```
+
+### 返回值
+
+```tsx
+interface UseClipboardReturn {
+  value: string;                           // 当前剪贴板内容
+  copied: boolean;                         // 是否刚刚复制成功
+  copying: boolean;                        // 是否正在复制
+  copy: (text: string) => Promise<boolean>; // 复制文本
+  read: () => Promise<string>;             // 读取剪贴板
+  reset: () => void;                       // 重置状态
+}
+```
+
+### 基本用法
+
+```tsx
+import { useState } from 'react'
+import { useClipboard } from 'joy-at-meeting'
+
+function ClipboardExample() {
+  const { copy, copied, value, read } = useClipboard({
+    timeout: 3000,
+    onSuccess: (text) => console.log('复制成功:', text),
+    onError: (error) => console.error('复制失败:', error)
+  })
+
+  const [inputValue, setInputValue] = useState('')
+
+  return (
+    <div>
+      <input 
+        value={inputValue} 
+        onChange={(e) => setInputValue(e.target.value)} 
+        placeholder="输入要复制的文本"
+      />
+      <button onClick={() => copy(inputValue)}>
+        {copied ? '已复制!' : '复制'}
+      </button>
+      <button onClick={read}>读取剪贴板</button>
+      {value && <p>剪贴板内容: {value}</p>}
+    </div>
+  )
+}
+```
+
+### 高级用法
+
+```tsx
+import { useClipboard } from 'joy-at-meeting'
+
+function AdvancedClipboard() {
+  const { copy, copied, copying, value, read, reset } = useClipboard({
+    timeout: 5000,
+    onSuccess: (text) => {
+      console.log(`成功复制: ${text}`)
+    },
+    onError: (error) => {
+      console.error('剪贴板操作失败:', error)
+    }
+  })
+
+  const copyCode = () => {
+    const code = `
+function hello() {
+  console.log('Hello, World!')
+}
+    `.trim()
+    copy(code)
+  }
+
+  const copyJSON = () => {
+    const data = { name: 'John', age: 30 }
+    copy(JSON.stringify(data, null, 2))
+  }
+
+  return (
+    <div>
+      <div>
+        <button onClick={copyCode} disabled={copying}>
+          {copying ? '复制中...' : copied ? '代码已复制!' : '复制代码'}
+        </button>
+        <button onClick={copyJSON} disabled={copying}>
+          复制 JSON
+        </button>
+        <button onClick={read}>读取剪贴板</button>
+        <button onClick={reset}>重置状态</button>
+      </div>
+      
+      {value && (
+        <div>
+          <h4>剪贴板内容:</h4>
+          <pre style={{ background: '#f5f5f5', padding: '1rem' }}>
+            {value}
+          </pre>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+### 注意事项
+
+1. **浏览器兼容性**: 需要 HTTPS 环境或 localhost 才能使用 Clipboard API
+2. **权限处理**: 某些浏览器可能需要用户授权才能访问剪贴板
+3. **错误处理**: 建议使用 `onError` 回调处理可能的错误
+4. **安全限制**: 只能在用户交互（如点击事件）中调用复制功能
+
 ### 高级示例
 
 ```tsx

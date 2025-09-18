@@ -83,6 +83,7 @@ export default defineConfig({
           text: 'DOM Hooks',
           items: [
             { text: 'useClickOutside', link: '/api/dom-hooks#useclickoutside' },
+            { text: 'useClipboard', link: '/api/dom-hooks#useclipboard' },
             {
               text: 'useScrollPosition',
               link: '/api/dom-hooks#usescrollposition',
