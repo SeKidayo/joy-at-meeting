@@ -38,10 +38,11 @@ export default defineConfig({
         text: 'API',
         items: [
           { text: '状态管理', link: '/api/state-hooks' },
-          { text: 'DOM 操作', link: '/api/dom-hooks' },
+          { text: 'DOM操作', link: '/api/dom-hooks' },
           { text: '异步处理', link: '/api/async-hooks' },
           { text: '性能优化', link: '/api/performance-hooks' },
           { text: '表单处理', link: '/api/form-hooks' },
+          { text: '工具方法', link: '/api/utils-hooks' },
         ],
       },
     ],
@@ -76,7 +77,6 @@ export default defineConfig({
             },
             { text: 'useSessionStorage', link: '/api/state-hooks#usesessionstorage' },
             { text: 'useToggle', link: '/api/state-hooks#usetoggle' },
-            { text: 'usePrevious', link: '/api/state-hooks#useprevious' },
           ],
         },
         {
@@ -121,6 +121,12 @@ export default defineConfig({
           items: [
             { text: 'useForm', link: '/api/form-hooks#useform' },
             { text: 'useValidation', link: '/api/form-hooks#usevalidation' },
+          ],
+        },
+        {
+          text: 'Utils Hooks',
+          items: [
+            { text: 'usePrevious', link: '/api/utils-hooks#useprevious' },
           ],
         },
       ],
