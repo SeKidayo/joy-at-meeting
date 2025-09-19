@@ -32,13 +32,13 @@ export interface UseClipboardReturn {
 
 /**
  * useClipboard - 剪贴板操作管理的 React Hook
- * 
+ *
  * 提供了完整的剪贴板操作功能，包括复制文本、读取剪贴板内容、
  * 状态管理等，支持现代浏览器的 Clipboard API 和传统的 execCommand。
- * 
+ *
  * @param options - 配置选项
  * @returns 包含剪贴板操作函数和状态的对象
- * 
+ *
  * @example
  * ```tsx
  * const { copy, copied, value, read } = useClipboard({
@@ -46,12 +46,12 @@ export interface UseClipboardReturn {
  *   onSuccess: (text) => console.log('复制成功:', text),
  *   onError: (error) => console.error('复制失败:', error)
  * });
- * 
+ *
  * return (
  *   <div>
- *     <input 
- *       value={value} 
- *       onChange={(e) => setValue(e.target.value)} 
+ *     <input
+ *       value={value}
+ *       onChange={(e) => setValue(e.target.value)}
  *       placeholder="输入要复制的文本"
  *     />
  *     <button onClick={() => copy(value)}>
@@ -64,7 +64,7 @@ export interface UseClipboardReturn {
  */
 function useClipboard(options: UseClipboardOptions = {}): UseClipboardReturn {
   const { timeout = 2000, onError, onSuccess } = options;
-  
+
   const [value, setValue] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [copying, setCopying] = useState<boolean>(false);
@@ -97,12 +97,12 @@ function useClipboard(options: UseClipboardOptions = {}): UseClipboardReturn {
       textArea.style.left = '-999999px';
       textArea.style.top = '-999999px';
       document.body.appendChild(textArea);
-      
+
       // 选择并复制
       textArea.focus();
       textArea.select();
       const result = document.execCommand('copy');
-      
+
       // 清理
       document.body.removeChild(textArea);
       return result;
@@ -116,44 +116,47 @@ function useClipboard(options: UseClipboardOptions = {}): UseClipboardReturn {
    * @param text - 要复制的文本
    * @returns 是否复制成功
    */
-  const copy = useCallback(async (text: string): Promise<boolean> => {
-    if (copying) return false;
-    
-    setCopying(true);
-    
-    try {
-      let success = false;
-      
-      // 优先使用现代 Clipboard API
-      if (navigator.clipboard && window.isSecureContext) {
-        success = await copyWithClipboardAPI(text);
-      } else {
-        // 降级到 execCommand
-        success = copyWithExecCommand(text);
+  const copy = useCallback(
+    async (text: string): Promise<boolean> => {
+      if (copying) return false;
+
+      setCopying(true);
+
+      try {
+        let success = false;
+
+        // 优先使用现代 Clipboard API
+        if (navigator.clipboard && window.isSecureContext) {
+          success = await copyWithClipboardAPI(text);
+        } else {
+          // 降级到 execCommand
+          success = copyWithExecCommand(text);
+        }
+
+        if (success) {
+          setValue(text);
+          setCopied(true);
+          onSuccess?.(text);
+
+          // 设置超时重置状态
+          setTimeout(() => {
+            setCopied(false);
+          }, timeout);
+
+          return true;
+        } else {
+          throw new Error('复制失败');
+        }
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error('复制失败');
+        onError?.(err);
+        return false;
+      } finally {
+        setCopying(false);
       }
-      
-      if (success) {
-        setValue(text);
-        setCopied(true);
-        onSuccess?.(text);
-        
-        // 设置超时重置状态
-        setTimeout(() => {
-          setCopied(false);
-        }, timeout);
-        
-        return true;
-      } else {
-        throw new Error('复制失败');
-      }
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error('复制失败');
-      onError?.(err);
-      return false;
-    } finally {
-      setCopying(false);
-    }
-  }, [copying, timeout, onSuccess, onError]);
+    },
+    [copying, timeout, onSuccess, onError]
+  );
 
   /**
    * 从剪贴板读取文本
